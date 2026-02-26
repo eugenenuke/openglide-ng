@@ -61,13 +61,26 @@ if test x$disable_sdl = xno ; then
     )
 fi
 
-if test x$have_sdl_lib = xyes ; then
-    AC_DEFINE(C_USE_SDL)
+if test x$enable_sdl != xno ; then
+    AC_DEFINE(C_USE_SDL, 1, [Define to 1 to use SDL library])
     # Don't need SDLmain since we're a library
     SDL_LIBS="${SDL_LIBS/-lSDL2main/}"
     LIBS="$LIBS ${SDL_LIBS/-lSDL2main/}"
     CPPFLAGS="$CPPFLAGS $SDL_CFLAGS"
+    have_sdl_lib=yes
 fi
+AM_CONDITIONAL(USE_SDL, test x$have_sdl_lib = xyes)
+
+case "$target" in
+    *mingw32* | *cygwin* | *win32*)
+        AC_DEFINE(WIN32, 1, [Define to 1 if you are on Windows])
+        is_win32=yes
+        ;;
+    *)
+        is_win32=no
+        ;;
+esac
+AM_CONDITIONAL(WIN32, test x$is_win32 = xyes)
 
 dnl The target cpu checks
 AC_MSG_CHECKING(for target cpu type)

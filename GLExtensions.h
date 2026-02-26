@@ -14,7 +14,8 @@
 #define __GLEXTENSIONS__
 
 #ifdef C_USE_SDL
-#include "SDL_opengl_glext.h"
+#include <SDL2/SDL_opengl.h>
+#include <SDL2/SDL_opengl_glext.h>
 #else
 #include <GL/glext.h>
 #endif

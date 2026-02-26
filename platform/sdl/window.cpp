@@ -54,8 +54,8 @@
     QuitSubSystem = (void (*)(const int))GetProcAddress((HMODULE)x, "SDL_QuitSubSystem")
 #endif
 
-#include "SDL.h"
-#include "SDL_opengl.h"
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_opengl.h>
 
 #include "GlOgl.h"
 
@@ -96,17 +96,12 @@ bool InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
     self_wnd = false;
     if (!wnd) {
         const char *title = "SDL2-OpenGLide";
-        uint32_t flags = (UserConfig.InitFullScreen)? SDL_WINDOW_FULLSCREEN_DESKTOP:0;
-        window = SDL_CreateWindow(title, x, y, width, height, flags);
-        if (window) {
-            if (UserConfig.SamplesMSAA) {
-                SDL20func.GLSetAttribute(SDL_GL_MULTISAMPLEBUFFERS, SDL_TRUE);
-                SDL20func.GLSetAttribute(SDL_GL_MULTISAMPLESAMPLES, UserConfig.SamplesMSAA);
-            }
-            SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl");
-            render = SDL_CreateRenderer(window, -1, 0);
+        uint32_t flags = SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI;
+        if (UserConfig.InitFullScreen) {
+            flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
         }
-        self_wnd = (window)? true:false;
+        window = SDL_CreateWindow(title, x, y, width, height, flags);
+        self_wnd = (window != nullptr);
     }
     else {
 #if (SIZEOF_INT_P == 8)
@@ -121,17 +116,10 @@ bool InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
         INIT_SUBSS(hlib);
         wnd_from = false;
         if (!(wnd & ((uintptr_t)0xFFFE << 32))) {
-            if (InitSubSystem && !InitSubSystem(SDL_INIT_VIDEO))
-                window = SDL_CreateWindowFrom((const void *)wnd);
-            if (window) {
-                if (UserConfig.SamplesMSAA) {
-                    SDL20func.GLSetAttribute(SDL_GL_MULTISAMPLEBUFFERS, SDL_TRUE);
-                    SDL20func.GLSetAttribute(SDL_GL_MULTISAMPLESAMPLES, UserConfig.SamplesMSAA);
-                }
-                SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl");
-                render = SDL_CreateRenderer(window, -1, 0);
-            }
-            wnd_from = (window)? true:false;
+            // For foreign windows, we also try to enable HighDPI
+            SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "0");
+            window = SDL_CreateWindowFrom((const void *)wnd);
+            wnd_from = (window != nullptr);
         }
 #else
         /* Never perform foreign window conversion for 32-bit system,
@@ -141,86 +129,101 @@ bool InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
         if (0) { }
 #endif
         else {
-            uint32_t flags = SDL_GetWindowFlags((SDL_Window *)wnd);
             window = (SDL_Window *)wnd;
-            if (flags & SDL_WINDOW_OPENGL)
-                render = nullptr;
-            else {
-                render = SDL_GetRenderer(window);
-                if (render)
-                    SDL_DestroyRenderer(render);
-                SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl");
-                render = SDL_CreateRenderer(window, -1, 0);
-            }
         }
     }
-    if (render) {
-        SDL_DestroyRenderer(render);
-        SDL_ResetHint(SDL_HINT_RENDER_DRIVER);
+
+    if (!window) {
+        fprintf(stderr, "Error: Could not create or attach to SDL window\n");
+        return false;
     }
+
     self_ctx = false;
     context = SDL_GL_GetCurrentContext();
     if (!context) {
-        context = SDL_GL_CreateContext(window);
-        self_ctx = (context)? true:false;
-    }
-    if (!context)
-        fprintf(stderr, "%s:%d %s\n", __FILE__, __LINE__, SDL_GetError());
-    else {
-        int cRedBits, cGreenBits, cBlueBits, cAlphaBits,cDepthBits, cStencilBits,
-            cAuxBuffers, nSamples[2], has_sRGB = UserConfig.FramebufferSRGB;
-        if (SDL_GL_MakeCurrent(window, context))
-            fprintf(stderr, "%s\n", SDL_GetError());
-        SDL20func.GLGetAttribute(SDL_GL_RED_SIZE, &cRedBits);
-        SDL20func.GLGetAttribute(SDL_GL_GREEN_SIZE, &cGreenBits);
-        SDL20func.GLGetAttribute(SDL_GL_BLUE_SIZE, &cBlueBits);
-        SDL20func.GLGetAttribute(SDL_GL_ALPHA_SIZE, &cAlphaBits);
-        SDL20func.GLGetAttribute(SDL_GL_DEPTH_SIZE, &cDepthBits);
-        SDL20func.GLGetAttribute(SDL_GL_STENCIL_SIZE, &cStencilBits);
-        SDL20func.GLGetAttribute(SDL_GL_MULTISAMPLEBUFFERS, &nSamples[0]);
-        SDL20func.GLGetAttribute(SDL_GL_MULTISAMPLESAMPLES, &nSamples[1]);
-        glGetIntegerv(GL_AUX_BUFFERS, &cAuxBuffers);
-
-        fprintf(stderr, "Info: %s OpenGL %s\n", glGetString(GL_RENDERER), glGetString(GL_VERSION));
-        fprintf(stderr, "Info: Pixel Format ABGR%d%d%d%d D%2dS%d nAux %d nSamples %d %d %s\n",
-                cAlphaBits,cBlueBits, cGreenBits, cRedBits, cDepthBits, cStencilBits,
-                cAuxBuffers, nSamples[0], nSamples[1], (has_sRGB)? "sRGB":"");
-
-        do {
-            int w, h;
-            SDL_GL_GetDrawableSize(window, &w, &h);
-            if (h > OpenGL.WindowHeight) {
-                float r = (1.f * height) / width,
-                      win_r = (1.f * h) / w;
-                if (r == win_r) {
-                    OpenGL.WindowWidth = w;
-                    OpenGL.WindowHeight = h;
-                    OpenGL.WindowOffset = 0;
-                }
-                else {
-                    OpenGL.WindowWidth = h / r;
-                    OpenGL.WindowHeight = h;
-                    OpenGL.WindowOffset = (w - OpenGL.WindowWidth) >> 1;
-                }
-                UserConfig.Resolution = OpenGL.WindowWidth;
-            }
-        } while(0);
-
-        if (has_sRGB)
-            glEnable(GL_FRAMEBUFFER_SRGB);
-
-        if (cDepthBits > 16)
-            UserConfig.PrecisionFix = false;
-
-        for (int i = 0; i < 0x100; i++) {
-            old_ramp.red[i]   = (uint16_t)(((i << 8) | i) & 0xFFFFU);
-            old_ramp.green[i] = (uint16_t)(((i << 8) | i) & 0xFFFFU);
-            old_ramp.blue[i]  = (uint16_t)(((i << 8) | i) & 0xFFFFU);
+        // Set GL attributes before creating context
+        SDL20func.GLSetAttribute(SDL_GL_RED_SIZE, 8);
+        SDL20func.GLSetAttribute(SDL_GL_GREEN_SIZE, 8);
+        SDL20func.GLSetAttribute(SDL_GL_BLUE_SIZE, 8);
+        SDL20func.GLSetAttribute(SDL_GL_ALPHA_SIZE, 8);
+        SDL20func.GLSetAttribute(SDL_GL_DEPTH_SIZE, 24);
+        SDL20func.GLSetAttribute(SDL_GL_STENCIL_SIZE, 8);
+        SDL20func.GLSetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+        
+        if (UserConfig.SamplesMSAA) {
+            SDL20func.GLSetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+            SDL20func.GLSetAttribute(SDL_GL_MULTISAMPLESAMPLES, UserConfig.SamplesMSAA);
         }
-        ramp_stored = true;
 
+        context = SDL_GL_CreateContext(window);
+        self_ctx = (context != nullptr);
     }
-    return (context)? true:false;
+
+    if (!context) {
+        fprintf(stderr, "%s:%d %s\n", __FILE__, __LINE__, SDL_GetError());
+        return false;
+    }
+
+    if (SDL_GL_MakeCurrent(window, context) != 0) {
+        fprintf(stderr, "%s\n", SDL_GetError());
+    }
+
+    int drawable_w, drawable_h;
+    SDL_GL_GetDrawableSize(window, &drawable_w, &drawable_h);
+
+    int cRedBits, cGreenBits, cBlueBits, cAlphaBits, cDepthBits, cStencilBits,
+        cAuxBuffers, nSamples[2], has_sRGB = UserConfig.FramebufferSRGB;
+
+    SDL20func.GLGetAttribute(SDL_GL_RED_SIZE, &cRedBits);
+    SDL20func.GLGetAttribute(SDL_GL_GREEN_SIZE, &cGreenBits);
+    SDL20func.GLGetAttribute(SDL_GL_BLUE_SIZE, &cBlueBits);
+    SDL20func.GLGetAttribute(SDL_GL_ALPHA_SIZE, &cAlphaBits);
+    SDL20func.GLGetAttribute(SDL_GL_DEPTH_SIZE, &cDepthBits);
+    SDL20func.GLGetAttribute(SDL_GL_STENCIL_SIZE, &cStencilBits);
+    SDL20func.GLGetAttribute(SDL_GL_MULTISAMPLEBUFFERS, &nSamples[0]);
+    SDL20func.GLGetAttribute(SDL_GL_MULTISAMPLESAMPLES, &nSamples[1]);
+    glGetIntegerv(GL_AUX_BUFFERS, &cAuxBuffers);
+
+    fprintf(stderr, "Info: %s OpenGL %s\r\n", glGetString(GL_RENDERER), glGetString(GL_VERSION));
+    fprintf(stderr, "Info: Pixel Format RGBA%d%d%d%d D%2dS%d nAux %d nSamples %d %d %s\r\n",
+            cRedBits, cGreenBits, cBlueBits, cAlphaBits, cDepthBits, cStencilBits,
+            cAuxBuffers, nSamples[0], nSamples[1], (has_sRGB)? "sRGB":"");
+    fprintf(stderr, "Info: Drawable Size: %dx%d\r\n", drawable_w, drawable_h);
+
+    // Calculate scaling to maintain aspect ratio
+    float target_aspect = (float)width / (float)height;
+    float actual_aspect = (float)drawable_w / (float)drawable_h;
+
+    if (actual_aspect > target_aspect) {
+        // Window is wider than needed - pillarbox
+        OpenGL.WindowHeight = drawable_h;
+        OpenGL.WindowWidth = (int)(drawable_h * target_aspect);
+        OpenGL.WindowOffset = (drawable_w - OpenGL.WindowWidth) / 2;
+    } else {
+        // Window is taller than needed - letterbox
+        OpenGL.WindowWidth = drawable_w;
+        OpenGL.WindowHeight = (int)(drawable_w / target_aspect);
+        OpenGL.WindowOffset = 0; // Vertical offset could be added here if needed
+    }
+
+    // Set the viewport based on calculated dimensions
+    glViewport(OpenGL.WindowOffset, (drawable_h - OpenGL.WindowHeight) / 2, 
+               OpenGL.WindowWidth, OpenGL.WindowHeight);
+
+    if (has_sRGB)
+        glEnable(GL_FRAMEBUFFER_SRGB);
+
+    if (cDepthBits > 16)
+        UserConfig.PrecisionFix = false;
+
+    for (int i = 0; i < 0x100; i++) {
+        old_ramp.red[i]   = (uint16_t)(((i << 8) | i) & 0xFFFFU);
+        old_ramp.green[i] = (uint16_t)(((i << 8) | i) & 0xFFFFU);
+        old_ramp.blue[i]  = (uint16_t)(((i << 8) | i) & 0xFFFFU);
+    }
+    ramp_stored = true;
+
+    return true;
 }
 
 void FinaliseOpenGLWindow(void)

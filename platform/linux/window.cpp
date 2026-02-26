@@ -13,7 +13,7 @@
 #include "config.h"
 #endif
 
-#if !defined C_USE_SDL && !defined WIN32
+#if !defined(C_USE_SDL) && !defined(WIN32)
 
 #include <math.h>
 #include <vector>

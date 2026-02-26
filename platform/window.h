@@ -21,10 +21,11 @@
 // Include proper OpenGL headers
 #ifdef C_USE_SDL
 #define GL_GLEXT_LEGACY
-#include "SDL_opengl.h"
 #if defined(__MACOSX__)
+#include "SDL_opengl.h"
 #include <OpenGL/glu.h> /* SDL2 macOS */
 #else
+#include <SDL2/SDL_opengl.h>
 #include <GL/glu.h> /* SDL2 Linux */
 #endif
 #elif defined(__MACOSX__)
