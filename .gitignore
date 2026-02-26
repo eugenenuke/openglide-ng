@@ -1,0 +1,40 @@
+# Build directories
+build/
+bin/
+obj/
+.libs/
+.deps/
+
+# Autotools artifacts
+Makefile
+Makefile.in
+autom4te.cache/
+aclocal.m4
+compile
+config.guess
+config.h
+config.h.in
+config.log
+config.status
+config.sub
+configure
+configure~
+depcomp
+install-sh
+libtool
+ltmain.sh
+missing
+stamp-h1
+
+# Shared library files
+*.la
+*.lo
+*.o
+*.so*
+*.a
+
+# Editor/OS artifacts
+*~
+.DS_Store
+.vscode/
+.idea/
