@@ -71,7 +71,7 @@ bool InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
             if (wnd > 0xFFFFFFFFUL) {
                 window = (SDL_Window *)wnd;
             } else {
-                // It's a native handle, try to wrap it (risky with sdl2-compat/SDL3)
+                // It's a native handle, try to wrap it
                 SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "0");
                 window = SDL_CreateWindowFrom((const void *)(uintptr_t)wnd);
                 self_wnd = (window != nullptr);
@@ -108,7 +108,9 @@ bool InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
         return false;
     }
 
-    SDL_GL_MakeCurrent(window, context);
+    if (SDL_GL_GetCurrentContext() != context) {
+        SDL_GL_MakeCurrent(window, context);
+    }
 
     int drawable_w, drawable_h;
     SDL_GL_GetDrawableSize(window, &drawable_w, &drawable_h);
@@ -220,8 +222,10 @@ void SetSwapInterval(const int interval)
 
 void SwapBuffers()
 {
-    SDL_Event e;
-    while(SDL_PollEvent(&e));
+    if (self_wnd) {
+        SDL_Event e;
+        while(SDL_PollEvent(&e));
+    }
     if (UserConfig.swap12) {
         void (*glSwapFunc)(void) = (void (*)(void))UserConfig.swap12;
         glSwapFunc();
