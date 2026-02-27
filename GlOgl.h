@@ -39,6 +39,12 @@
 #include "platform/window.h"
 
 #include <stdio.h>
+#include <stdlib.h>
+
+extern int OpenGLideDebug;
+#define GlideDebugMsg(...) do { \
+    if (OpenGLideDebug) { fprintf(stderr, __VA_ARGS__); } \
+} while(0)
 
 #include "sdk2_glide.h"
 

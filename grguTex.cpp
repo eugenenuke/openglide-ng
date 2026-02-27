@@ -72,6 +72,9 @@ grTexSource( GrChipID_t tmu,
     Glide.State.TexSource.Info.largeLod = info->largeLod;
     Glide.State.TexSource.Info.smallLod = info->smallLod;
 
+    GlideDebugMsg("DB_TEX: grTexSource(addr=0x%x, fmt=%d, lod=%d-%d)\r\n", 
+                  (unsigned int)startAddress, (int)info->format, (int)info->largeLod, (int)info->smallLod);
+
     Textures->Source( startAddress, evenOdd, info );    
 }
 
@@ -108,6 +111,9 @@ grTexDownloadMipMap( GrChipID_t tmu,
     }
 
     RenderDrawTriangles( );
+
+    GlideDebugMsg("DB_TEX: DownloadMipMap(addr=0x%x, fmt=%d, lod=%d-%d)\r\n", 
+                  (unsigned int)startAddress, (int)info->format, (int)info->largeLod, (int)info->smallLod);
 
     info->smallLod = info->largeLod;
     Textures->DownloadMipMap( startAddress, evenOdd, info );
@@ -726,7 +732,7 @@ grTexCombineFunction( GrChipID_t tmu, GrTextureCombineFnc_t func )
             GR_COMBINE_FUNCTION_SCALE_OTHER, GR_COMBINE_FACTOR_LOCAL, FXFALSE, FXFALSE );
         break;
 
-    case GR_TEXTURECOMBINE_SUBTRACT:        // Cother – Clocal subtractive texture
+    case GR_TEXTURECOMBINE_SUBTRACT:        // Cother ï¿½ Clocal subtractive texture
         grTexCombine( tmu, GR_COMBINE_FUNCTION_SCALE_OTHER_MINUS_LOCAL, GR_COMBINE_FACTOR_ONE,
             GR_COMBINE_FUNCTION_SCALE_OTHER_MINUS_LOCAL, GR_COMBINE_FACTOR_ONE, FXFALSE, FXFALSE );
         break;
@@ -804,7 +810,7 @@ guTexCombineFunction( GrChipID_t tmu, GrTextureCombineFnc_t func )
             GR_COMBINE_FUNCTION_SCALE_OTHER, GR_COMBINE_FACTOR_LOCAL, FXFALSE, FXFALSE );
         break;
 
-    case GR_TEXTURECOMBINE_SUBTRACT:        // Cother – Clocal subtractive texture
+    case GR_TEXTURECOMBINE_SUBTRACT:        // Cother ï¿½ Clocal subtractive texture
         grTexCombine( tmu, GR_COMBINE_FUNCTION_SCALE_OTHER_MINUS_LOCAL, GR_COMBINE_FACTOR_ONE,
             GR_COMBINE_FUNCTION_SCALE_OTHER_MINUS_LOCAL, GR_COMBINE_FACTOR_ONE, FXFALSE, FXFALSE );
         break;

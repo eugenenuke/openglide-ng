@@ -600,3 +600,4 @@ bool GenerateErrorFile( void )
     return true;
 }
 
+int OpenGLideDebug = 0;

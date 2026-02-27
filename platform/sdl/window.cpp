@@ -47,6 +47,10 @@ bool InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
     self_wnd = false;
     self_ctx = false;
 
+    if (OpenGLideDebug == 0) {
+        OpenGLideDebug = (getenv("OPENGLIDE_DEBUG") != NULL) ? 1 : -1;
+    }
+
     // Standardized logging for raw terminals
     fprintf(stderr, "Info: InitialiseOpenGLWindow(wnd=0x%lx, res=%dx%d)\r\n", (unsigned long)wnd, width, height);
 
