@@ -510,6 +510,7 @@ grSstQueryHardware( GrHwConfiguration *hwconfig )
 #ifdef OGL_DONE
     GlideMsg( "grSstQueryHardware( --- )\n" );
 #endif
+    GlideMsg( "DB_STATE: grSstQueryHardware spoofing Voodoo 2 (2 TMUs, 16MB/TMU)\n" );
 
     hwconfig->num_sst = 1;
     hwconfig->SSTs[0].type = GR_SSTTYPE_Voodoo2;

@@ -136,7 +136,7 @@ grGet( FxU32 pname, FxU32 plength, FxI32 *params )
         sizeof(GrState),
     };
     /* GR_MEMORY                FB        TMU       UMA */
-    static FxU32 chipMem[3] = { 0x400000, 0x400000, 0x00 };
+    static FxU32 chipMem[3] = { 0x400000, 0x1000000, 0x00 };
     static FxU32 chipRev[2] = { 0x02, 0x01 };
     static FxU32 texAlign = 0x08;
     static const struct {
@@ -159,7 +159,7 @@ grGet( FxU32 pname, FxU32 plength, FxI32 *params )
         { GR_MEMORY_UMA, 4,               &chipMem[2] },
         { GR_NUM_BOARDS, 4,               &dataU32[1] },
         { GR_NUM_FB, 4,                   &dataU32[1] },
-        { GR_NUM_TMU, 4,                  &dataU32[1] },
+        { GR_NUM_TMU, 4,                  &dataU32[2] },
         { GR_REVISION_FB, 4,              &chipRev[0] },
         { GR_REVISION_TMU, 4,             &chipRev[1] },
         { GR_SUPPORTS_PASSTHRU, 4,        &dataU32[1] },
@@ -175,9 +175,9 @@ grGet( FxU32 pname, FxU32 plength, FxI32 *params )
     int i;
     const char *chipstr = (pname == GR_NUM_BOARDS)? " ":grGetString(GR_HARDWARE);
 
-//#define VOODOO_TYPE " GETGAMMA ","Voodoo2"
+#define VOODOO_TYPE " GETGAMMA ","Voodoo2"
 //#define VOODOO_TYPE " GETGAMMA ","Voodoo Graphics"
-#define VOODOO_TYPE " GETGAMMA TEXUMA ","Voodoo Banshee"
+//#define VOODOO_TYPE " GETGAMMA TEXUMA ","Voodoo Banshee"
 
     if (!strncmp(chipstr, "Voodoo Banshee", sizeof("Voodoo Banshee"))) {
         chipMem[2] = Glide.TextureMemory;
@@ -216,6 +216,8 @@ grGet( FxU32 pname, FxU32 plength, FxI32 *params )
     if (ret == 0)
         DPRINTF("Failed grGet() pname=0x%02X\n", pname);
 
+    DPRINTF("grGet(pname=0x%02X, plength=%d) returns %d\n", pname, plength, ret);
+
     return ret;
 }
 
@@ -224,7 +226,7 @@ grGetString( FxU32 pname )
 {
     static const char *cstrTbl[] = {
         VOODOO_TYPE,
-        "Glide",
+        "Voodoo2",
         "3Dfx Interactive",
         "3.01",
     };
@@ -232,6 +234,8 @@ grGetString( FxU32 pname )
     trace_g3ext = 1;
     if ((pname & 0x0F) < 0x05)
         p = cstrTbl[pname & 0x0F];
+
+    DPRINTF("grGetString(pname=0x%02X) returns \"%s\"\n", pname, p ? p : "NULL");
     return p;
 }
 
