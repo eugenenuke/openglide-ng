@@ -111,8 +111,8 @@ grTexDownloadMipMap( GrChipID_t tmu,
 
     RenderDrawTriangles( );
 
-    GlideDebugMsg("DB_TEX: grTexDownloadMipMap(tmu=%d, addr=0x%x, contentHash=0x%x)\r\n", 
-                  (int)tmu, (unsigned int)startAddress, DebugContentHash(info->data, 256)); // Hash first 256 bytes
+    GlideDebugMsg("DB_TEX: grTexDownloadMipMap(tmu=%d, addr=0x%x, contentHash=0x%x, fmt=%d)\r\n", 
+                  (int)tmu, (unsigned int)startAddress, DebugContentHash(info->data, 1024), (int)info->format); // Hash first 1K
 
     info->smallLod = info->largeLod;
     Textures->DownloadMipMap( startAddress, evenOdd, info );

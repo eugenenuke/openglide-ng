@@ -19,7 +19,9 @@
 
 TexDB::TexDB( unsigned int MemorySize )
 {
-    numberOfTexSections = MemorySize >> 15; // ( 32 * 1024 );
+    numberOfTexSections = (MemorySize + 0x7FFF) >> 15; // ( 32 * 1024 );
+
+    GlideDebugMsg("DB_TEX: Initializing database for %u bytes (%d sections)\r\n", MemorySize, (int)numberOfTexSections);
 
     m_first = new Record*[ numberOfTexSections ];
 
@@ -50,8 +52,13 @@ TexDB::~TexDB( void )
 GrTexInfo * TexDB::Find( FxU32 startAddress, GrTexInfo *info, FxU32 hash, 
                   GLuint *pTexNum, GLuint *pTex2Num, bool *pal_change )
 {
-    Record  * r;
     FxU32   sect = startAddress >> 15; // ( 32 * 1024 );
+    if ( sect >= numberOfTexSections )
+    {
+        GlideDebugMsg("DB_TEX: Find ERROR addr=0x%x is out of range\r\n", (unsigned int)startAddress);
+        return NULL;
+    }
+    Record  * r;
 
     for ( r = m_first[ sect ]; r != NULL; r = r->next )
     {
@@ -91,8 +98,12 @@ void TexDB::WipeRange(FxU32 startAddress, FxU32 endAddress, FxU32 hash)
     FxU32   end_sect;
 
     stt_sect = startAddress >> 15; // ( 32 * 1024 );
+    if ( stt_sect >= numberOfTexSections )
+    {
+        return;
+    }
 
-   /*
+    /*
     * Textures can be as large as 128K, so
     * one that starts 3 sections back can
     * extend into this one.
@@ -105,9 +116,8 @@ void TexDB::WipeRange(FxU32 startAddress, FxU32 endAddress, FxU32 hash)
     {
         stt_sect -= 4;
     }
- 
-    end_sect = endAddress >> 15; // ( 32 * 1024 );
 
+    end_sect = endAddress >> 15; // ( 32 * 1024 );
     if ( end_sect >= numberOfTexSections )
     {
         end_sect = numberOfTexSections - 1;
@@ -140,10 +150,14 @@ void TexDB::WipeRange(FxU32 startAddress, FxU32 endAddress, FxU32 hash)
 
 void TexDB::Add( FxU32 startAddress, FxU32 endAddress, GrTexInfo *info, FxU32 hash, GLuint *pTexNum, GLuint *pTex2Num )
 {
-    Record  *r = new Record( pTex2Num != NULL );
-    FxU32   sect;
+    FxU32   sect = startAddress >> 15; // 32 * 1024
+    if ( sect >= numberOfTexSections )
+    {
+        GlideDebugMsg("DB_TEX: Add ERROR addr=0x%x is out of range\r\n", (unsigned int)startAddress);
+        return;
+    }
 
-    sect = startAddress >> 15; // 32 * 1024
+    Record  *r = new Record( pTex2Num != NULL );
 
     r->startAddress = startAddress;
     r->endAddress = endAddress;
