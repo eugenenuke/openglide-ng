@@ -213,6 +213,12 @@ void PGTexture::Source( FxU32 startAddress, FxU32 evenOdd, GrTexInfo *info )
     m_hAspect = texAspects[ info->aspectRatio ].h;
 
     m_valid = ( ( startAddress + TextureMemRequired( evenOdd, info ) ) <= m_tex_memory_size );
+
+    // IMPORTANT: Always refresh palette hash if using a paletted format
+    if ( m_info.format == GR_TEXFMT_P_8 || m_info.format == GR_TEXFMT_AP_88 )
+    {
+        ApplyKeyToPalette();
+    }
 }
 
 void PGTexture::DownloadTable( GrTexTable_t type, FxU32 *data, int first, int count )
@@ -658,7 +664,8 @@ void PGTexture::ApplyKeyToPalette( void )
     
     if ( m_palette_dirty )
     {
-        hash = 0;
+        // FNV-1a initialization
+        hash = 2166136261U; 
         for ( i = 0; i < 256; i++ )
         {
             if ( ( m_chromakey_mode ) && 
@@ -671,14 +678,19 @@ void PGTexture::ApplyKeyToPalette( void )
                 m_palette[i] |= 0xff000000;
             }
             
-            hash = ( ( hash << 5 ) | ( hash >> 27 ) );
-            hash += ( InternalConfig.IgnorePaletteChange
+            FxU32 val = ( InternalConfig.IgnorePaletteChange
                       ? ( m_palette[ i ] & 0xff000000  )
                       : m_palette[ i ]);
+            
+            // FNV-1a step
+            hash ^= val;
+            hash *= 16777619U;
         }
         
         m_palette_hash = hash;
         m_palette_dirty = false;
+        
+        GlideDebugMsg("DB_TEX: Palette hash updated to 0x%x\r\n", (unsigned int)m_palette_hash);
     }
 }
 
