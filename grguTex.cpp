@@ -370,18 +370,13 @@ grTexDownloadTablePartial( GrChipID_t   tmu,
         tmu, type, start, end );
 #endif
 
-    if ( tmu != GR_TMU0 )
-    {
-        return;
-    }
+    GlideDebugMsg("DB_TEX: grTexDownloadTablePartial(tmu=%d, %s, start=%d, end=%d, hash=0x%x)\r\n", 
+        tmu, (type == GR_TEXTABLE_PALETTE ? "PALETTE" : "NCC"), start, end,
+        DebugContentHash((FxU8*)data + (start * 4), (end + 1 - start) * 4));
 
     RenderDrawTriangles( );
 
     Textures->DownloadTable( type, ((FxU32*)data) + start, start, end + 1 - start );
-    
-    GlideDebugMsg("DB_TEX: grTexDownloadTablePartial(tmu=%d, %s, start=%d, end=%d, hash=0x%x)\r\n", 
-        tmu, (type == GR_TEXTABLE_PALETTE ? "PALETTE" : "NCC"), start, end,
-        DebugContentHash((FxU8*)data + (start * 4), (end + 1 - start) * 4));
 }
 
 //*************************************************
@@ -395,11 +390,6 @@ grTexDownloadTable( GrChipID_t   tmu,
 #ifdef OGL_PARTDONE
     GlideMsg( "grTexDownloadTable( %d, %d, --- )\n", tmu, type );
 #endif
-
-    if ( tmu != GR_TMU0 )
-    {
-        return;
-    }
 
     if (type == GR_TEXTABLE_PALETTE) {
         GlideDebugMsg("DB_TEX: grTexDownloadTable(tmu=%d, PALETTE, hash=0x%x)\r\n", (int)tmu, DebugContentHash(data, 1024));
