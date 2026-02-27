@@ -77,6 +77,8 @@ PGTexture::PGTexture( int mem_size )
     m_valid = false;
     m_chromakey_mode = GR_CHROMAKEY_DISABLE;
     m_tex_memory_size = mem_size;
+    m_palette_hash = 0;
+    m_pixel_hash = 0;
     m_memory = new FxU8[ mem_size ];
     m_ncc_select = GR_NCCTABLE_NCC0;
 
@@ -125,7 +127,8 @@ void PGTexture::DownloadMipMap( FxU32 startAddress, FxU32 evenOdd, GrTexInfo *in
         texVals.lod = 0;
 
         m_db->WipeRange( startAddress, mip_offset, 0 );
-        m_db->Add( startAddress, mip_offset, info, 0, &texNum, NULL);
+        FxU32 contentHash = DebugContentHash( (FxU8*)info->data, (texVals.nPixels * 4 > 4096) ? 4096 : texVals.nPixels * 4 );
+        m_db->Add( startAddress, mip_offset, info, 0, contentHash, &texNum, NULL);
 
         glBindTexture( GL_TEXTURE_2D, texNum );
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, OpenGL.SClampMode );
@@ -218,6 +221,18 @@ void PGTexture::Source( FxU32 startAddress, FxU32 evenOdd, GrTexInfo *info )
     if ( m_info.format == GR_TEXFMT_P_8 || m_info.format == GR_TEXFMT_AP_88 )
     {
         ApplyKeyToPalette();
+    }
+
+    // NEW: Hash the pixel content to detect changes if the game streams to same address
+    if ( m_valid )
+    {
+        FxU32 size = TextureMemRequired( evenOdd, info );
+        // For performance, we only hash first 4K, which is enough for variety detection
+        m_pixel_hash = DebugContentHash( m_memory + startAddress, size > 4096 ? 4096 : size );
+    }
+    else
+    {
+        m_pixel_hash = 0;
     }
 }
 
@@ -332,7 +347,7 @@ bool PGTexture::MakeReady( void )
     }
 
     // See if we already have an OpenGL texture to match this
-    if ( m_db->Find( m_startAddress, &m_info, test_hash,
+    if ( m_db->Find( m_startAddress, &m_info, test_hash, m_pixel_hash,
                      &texNum, use_two_textures ? &tex2Num : NULL,
                      pal_change_ptr ) )
     {
@@ -355,14 +370,15 @@ bool PGTexture::MakeReady( void )
     }
     else
     {
-        GlideDebugMsg("DB_TEX: Cache MISS (addr=0x%x hash=0x%x) - Uploading new texture\r\n", (unsigned int)m_startAddress, (unsigned int)test_hash);
+        GlideDebugMsg("DB_TEX: Cache MISS (addr=0x%x hash=0x%x pixHash=0x%x) - Uploading new texture\r\n", 
+                      (unsigned int)m_startAddress, (unsigned int)test_hash, (unsigned int)m_pixel_hash);
         // Any existing textures crossing this memory range
         // is unlikely to be used, so remove the OpenGL version
         // of them
         m_db->WipeRange( m_startAddress, m_startAddress + size, wipe_hash );
 
         // Add this new texture to the data base
-        m_db->Add( m_startAddress, m_startAddress + size, &m_info, test_hash,
+        m_db->Add( m_startAddress, m_startAddress + size, &m_info, test_hash, m_pixel_hash,
                    &texNum, use_two_textures ? &tex2Num : NULL );
 
         glBindTexture( GL_TEXTURE_2D, texNum );

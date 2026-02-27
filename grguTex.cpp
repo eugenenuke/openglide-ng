@@ -398,7 +398,7 @@ grTexDownloadTable( GrChipID_t   tmu,
     }
 
     if (type == GR_TEXTABLE_PALETTE) {
-        GlideDebugMsg("DB_TEX: grTexDownloadTable(PALETTE, hash=0x%x)\r\n", DebugContentHash(data, 1024));
+        GlideDebugMsg("DB_TEX: grTexDownloadTable(tmu=%d, PALETTE, hash=0x%x)\r\n", (int)tmu, DebugContentHash(data, 1024));
     }
 
     RenderDrawTriangles( );

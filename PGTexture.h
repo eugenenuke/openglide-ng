@@ -71,6 +71,7 @@ private:
     FxU32           m_tex_memory_size;
     bool            m_palette_dirty;
     FxU32           m_palette_hash;
+    FxU32           m_pixel_hash;
     TexDB *         m_db;
     GrChromakeyMode_t m_chromakey_mode;
     FxU32           m_chromakey_value_8888;

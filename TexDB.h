@@ -26,18 +26,19 @@ public:
         FxU32 endAddress;
         GrTexInfo info;
         FxU32 hash;
+        FxU32 contentHash;
         GLuint texNum;
         GLuint tex2Num;
         Record *next;
 
         Record( bool two_tex );
         ~Record( void );
-        bool Match( FxU32 stt, GrTexInfo *inf, FxU32 h );
+        bool Match( FxU32 stt, GrTexInfo *inf, FxU32 h, FxU32 ch );
     };
 
-    void Add( FxU32 startAddress, FxU32 endAddress, GrTexInfo *info, FxU32 hash, GLuint *pTexNum, GLuint *pTex2Num );
+    void Add( FxU32 startAddress, FxU32 endAddress, GrTexInfo *info, FxU32 hash, FxU32 contentHash, GLuint *pTexNum, GLuint *pTex2Num );
     void WipeRange( FxU32 startAddress, FxU32 endAddress, FxU32 hash );
-    GrTexInfo * Find( FxU32 startAddress, GrTexInfo *info, FxU32 hash, 
+    GrTexInfo * Find( FxU32 startAddress, GrTexInfo *info, FxU32 hash, FxU32 contentHash,
                GLuint *pTexNum, GLuint *pTex2Num, bool *pal_change );
     TexDB( unsigned int MemorySize );
     virtual ~TexDB( void );

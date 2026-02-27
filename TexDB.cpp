@@ -49,7 +49,7 @@ TexDB::~TexDB( void )
     delete[] m_first;
 }
 
-GrTexInfo * TexDB::Find( FxU32 startAddress, GrTexInfo *info, FxU32 hash, 
+GrTexInfo * TexDB::Find( FxU32 startAddress, GrTexInfo *info, FxU32 hash, FxU32 contentHash,
                   GLuint *pTexNum, GLuint *pTex2Num, bool *pal_change )
 {
     FxU32   sect = startAddress >> 15; // ( 32 * 1024 );
@@ -62,7 +62,7 @@ GrTexInfo * TexDB::Find( FxU32 startAddress, GrTexInfo *info, FxU32 hash,
 
     for ( r = m_first[ sect ]; r != NULL; r = r->next )
     {
-        if ( r->Match( startAddress, info, ( pal_change == NULL ) ? hash : 0 ) )
+        if ( r->Match( startAddress, info, ( pal_change == NULL ) ? hash : 0, contentHash ) )
         {
             *pTexNum = r->texNum;
 
@@ -103,7 +103,7 @@ void TexDB::WipeRange(FxU32 startAddress, FxU32 endAddress, FxU32 hash)
         return;
     }
 
-    /*
+   /*
     * Textures can be as large as 128K, so
     * one that starts 3 sections back can
     * extend into this one.
@@ -134,9 +134,8 @@ void TexDB::WipeRange(FxU32 startAddress, FxU32 endAddress, FxU32 hash)
                  ( r->startAddress < endAddress ) && 
                  ( ( hash == 0 ) || ( r->hash == hash ) ) )
             {
-                GlideDebugMsg("DB_TEX: WipeRange hit! Removing addr=0x%x..0x%x (requested 0x%x..0x%x)\r\n", 
-                             (unsigned int)r->startAddress, (unsigned int)r->endAddress,
-                             (unsigned int)startAddress, (unsigned int)endAddress);
+                GlideDebugMsg("DB_TEX: WipeRange hit! Removing addr=0x%x..0x%x\r\n", 
+                             (unsigned int)r->startAddress, (unsigned int)r->endAddress);
                 *p = r->next;
 #ifdef OGL_UTEX
                 GlideMsg( "Wipe tex %d\n", r->texNum );
@@ -151,7 +150,7 @@ void TexDB::WipeRange(FxU32 startAddress, FxU32 endAddress, FxU32 hash)
     }
 }
 
-void TexDB::Add( FxU32 startAddress, FxU32 endAddress, GrTexInfo *info, FxU32 hash, GLuint *pTexNum, GLuint *pTex2Num )
+void TexDB::Add( FxU32 startAddress, FxU32 endAddress, GrTexInfo *info, FxU32 hash, FxU32 contentHash, GLuint *pTexNum, GLuint *pTex2Num )
 {
     FxU32   sect = startAddress >> 15; // 32 * 1024
     if ( sect >= numberOfTexSections )
@@ -166,6 +165,7 @@ void TexDB::Add( FxU32 startAddress, FxU32 endAddress, GrTexInfo *info, FxU32 ha
     r->endAddress = endAddress;
     r->info = *info;
     r->hash = hash;
+    r->contentHash = contentHash;
 
     r->next = m_first[ sect ];
     m_first[ sect ] = r;
@@ -207,6 +207,7 @@ void TexDB::Clear( void )
 TexDB::Record::Record( bool two_tex )
 {
    glGenTextures( 1, &texNum );
+   contentHash = 0;
 
    if ( two_tex )
    {
@@ -220,19 +221,24 @@ TexDB::Record::Record( bool two_tex )
 
 TexDB::Record::~Record( void )
 {
-   glDeleteTextures( 1, &texNum );
+    glDeleteTextures( 1, &texNum );
 
-   if ( tex2Num != 0 )
-   {
-         glDeleteTextures( 1, &tex2Num );
-   }
+    if ( tex2Num )
+    {
+        glDeleteTextures( 1, &tex2Num );
+    }
 }
 
-bool TexDB::Record::Match( FxU32 stt, GrTexInfo *inf, FxU32 h )
+bool TexDB::Record::Match( FxU32 stt, GrTexInfo *inf, FxU32 h, FxU32 ch )
 {
-   return ( ( startAddress == stt ) && 
-            ( inf->largeLod == info.largeLod ) && 
-            ( inf->aspectRatio == info.aspectRatio ) && 
-            ( inf->format == info.format ) && 
-            ( ( hash == h ) || ( h == 0 ) ) );
+    if ( ( startAddress == stt ) &&
+         ( info.format == inf->format ) &&
+         ( info.largeLod == inf->largeLod ) &&
+         ( info.aspectRatio == inf->aspectRatio ) &&
+         ( ( h == 0 ) || ( hash == h ) ) &&
+         ( contentHash == ch ) )
+    {
+        return true;
+    }
+    return false;
 }
