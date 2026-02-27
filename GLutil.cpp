@@ -36,24 +36,26 @@ extern unsigned long    NumberOfErrors;
 
 VARARGDECL(void) GlideMsg( const char *szString, ... )
 {
-    va_list( Arg );
+    va_list Arg;
+    va_list ArgCopy;
     va_start( Arg, szString );
+    va_copy( ArgCopy, Arg );
 
-    vprintf( szString, Arg ); // Also print to stdout
+    vprintf( szString, Arg ); 
     fflush( stdout );
 
     FILE *fHandle = fopen( GLIDEFILE, "at" );
-    if ( !fHandle )
+    if ( fHandle )
     {
-        va_end( Arg );
-        return;
+        vfprintf( fHandle, szString, ArgCopy );
+        fflush( fHandle );
+        fclose( fHandle );
     }
-    vfprintf( fHandle, szString, Arg );
-    fflush( fHandle );
-    fclose( fHandle );
 
     va_end( Arg );
+    va_end( ArgCopy );
 }
+
 
 VARARGDECL(void) Error( const char *szString, ... )
 {
