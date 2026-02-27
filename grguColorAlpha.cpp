@@ -59,6 +59,7 @@ grConstantColorValue( GrColor_t value )
 #ifdef OGL_DONE
     GlideMsg( "grConstantColorValue( 0x%X )\n", value );
 #endif
+    GlideDebugMsg("DB_STATE: grConstantColorValue(0x%x)\r\n", (unsigned int)value);
 
     Glide.State.ConstantColorValue = value;
     ConvertColorF( value, 
