@@ -116,6 +116,55 @@ bool InitialiseOpenGLWindow(FxU wnd, int x, int y, int width, int height)
         SDL_GL_MakeCurrent(window, context);
     }
 
+    // --- CONTEXT SANITIZER ---
+    // When hijacking a context from DOSBox-X, it may contain leftover state 
+    // (active shaders, texture units, scissors, etc.) that breaks Glide's 
+    // fixed-function expectations. Force a hard reset here.
+    fprintf(stderr, "Info: Sanitizing OpenGL context state...\r\n");
+
+    // Reset fixed-function enables
+    glDisable(GL_SCISSOR_TEST);
+    glDisable(GL_STENCIL_TEST);
+    glDisable(GL_ALPHA_TEST);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_BLEND);
+    glDisable(GL_FOG);
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_TEXTURE_2D);
+
+    // Reset masks
+    glDepthMask(GL_TRUE);
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+
+    // Reset active texture unit if possible
+    PFNGLACTIVETEXTUREARBPROC active_tex = (PFNGLACTIVETEXTUREARBPROC)SDL_GL_GetProcAddress("glActiveTexture");
+    if (!active_tex) active_tex = (PFNGLACTIVETEXTUREARBPROC)SDL_GL_GetProcAddress("glActiveTextureARB");
+    if (active_tex) {
+        active_tex(GL_TEXTURE1); glDisable(GL_TEXTURE_2D);
+        active_tex(GL_TEXTURE0); glEnable(GL_TEXTURE_2D);
+    }
+
+    // Disable modern pipeline state if it exists (Shaders, VBOs, VAOs)
+    PFNGLUSEPROGRAMPROC use_prog = (PFNGLUSEPROGRAMPROC)SDL_GL_GetProcAddress("glUseProgram");
+    if (use_prog) use_prog(0);
+
+    PFNGLBINDBUFFERPROC bind_buf = (PFNGLBINDBUFFERPROC)SDL_GL_GetProcAddress("glBindBuffer");
+    if (bind_buf) {
+        bind_buf(GL_ARRAY_BUFFER, 0);
+        bind_buf(GL_ELEMENT_ARRAY_BUFFER, 0);
+    }
+
+    PFNGLBINDVERTEXARRAYPROC bind_vao = (PFNGLBINDVERTEXARRAYPROC)SDL_GL_GetProcAddress("glBindVertexArray");
+    if (bind_vao) bind_vao(0);
+
+    PFNGLBINDFRAMEBUFFERPROC bind_fbo = (PFNGLBINDFRAMEBUFFERPROC)SDL_GL_GetProcAddress("glBindFramebuffer");
+    if (bind_fbo) bind_fbo(GL_FRAMEBUFFER, 0);
+
+    glPixelStorei(GL_PACK_ALIGNMENT, 4);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+    // --- END SANITIZER ---
+
     int drawable_w, drawable_h;
     SDL_GL_GetDrawableSize(window, &drawable_w, &drawable_h);
 
