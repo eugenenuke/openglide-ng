@@ -512,15 +512,15 @@ grSstQueryHardware( GrHwConfiguration *hwconfig )
 #endif
 
     hwconfig->num_sst = 1;
-    hwconfig->SSTs[0].type = GR_SSTTYPE_VOODOO;
-//  hwconfig->SSTs[0].type = GR_SSTTYPE_Voodoo2;
-    hwconfig->SSTs[0].sstBoard.VoodooConfig.fbRam = UserConfig.FrameBufferMemorySize;
+    hwconfig->SSTs[0].type = GR_SSTTYPE_Voodoo2;
+    hwconfig->SSTs[0].sstBoard.VoodooConfig.fbRam = 4; // 4MB FBI
     hwconfig->SSTs[0].sstBoard.VoodooConfig.fbiRev = 2;
-    hwconfig->SSTs[0].sstBoard.VoodooConfig.nTexelfx = 1;
-//  hwconfig->SSTs[0].sstBoard.VoodooConfig.nTexelfx = 2;
+    hwconfig->SSTs[0].sstBoard.VoodooConfig.nTexelfx = 2; // 2 TMUs
     hwconfig->SSTs[0].sstBoard.VoodooConfig.sliDetect = FXFALSE;
     hwconfig->SSTs[0].sstBoard.VoodooConfig.tmuConfig[0].tmuRev = 1;
-    hwconfig->SSTs[0].sstBoard.VoodooConfig.tmuConfig[0].tmuRam = UserConfig.TextureMemorySize;
+    hwconfig->SSTs[0].sstBoard.VoodooConfig.tmuConfig[0].tmuRam = 16; // 16MB
+    hwconfig->SSTs[0].sstBoard.VoodooConfig.tmuConfig[1].tmuRev = 1;
+    hwconfig->SSTs[0].sstBoard.VoodooConfig.tmuConfig[1].tmuRam = 16; // 16MB
 
     return FXTRUE;
 }
