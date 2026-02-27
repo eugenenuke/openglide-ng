@@ -134,6 +134,9 @@ void TexDB::WipeRange(FxU32 startAddress, FxU32 endAddress, FxU32 hash)
                  ( r->startAddress < endAddress ) && 
                  ( ( hash == 0 ) || ( r->hash == hash ) ) )
             {
+                GlideDebugMsg("DB_TEX: WipeRange hit! Removing addr=0x%x..0x%x (requested 0x%x..0x%x)\r\n", 
+                             (unsigned int)r->startAddress, (unsigned int)r->endAddress,
+                             (unsigned int)startAddress, (unsigned int)endAddress);
                 *p = r->next;
 #ifdef OGL_UTEX
                 GlideMsg( "Wipe tex %d\n", r->texNum );

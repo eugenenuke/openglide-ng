@@ -397,6 +397,10 @@ grTexDownloadTable( GrChipID_t   tmu,
         return;
     }
 
+    if (type == GR_TEXTABLE_PALETTE) {
+        GlideDebugMsg("DB_TEX: grTexDownloadTable(PALETTE, hash=0x%x)\r\n", DebugContentHash(data, 1024));
+    }
+
     RenderDrawTriangles( );
 
     Textures->DownloadTable( type, (FxU32*)data, 0, 256 );
