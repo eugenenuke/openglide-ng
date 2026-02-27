@@ -33,8 +33,10 @@ grLfbLock( GrLock_t dwType,
 
     RenderDrawTriangles( );
 
-    GlideDebugMsg("DB_LFB: grLfbLock(type=%d, buffer=%d, writeMode=%d, pipeline=%d)\r\n", 
-                  (int)dwType, (int)dwBuffer, (int)dwWriteMode, (int)bPixelPipeline);
+    if (dwType == 2) {
+        GlideDebugMsg("DB_LFB: grLfbLock(TEXTURE_MEMORY, buffer=%d, writeMode=%d)\r\n", 
+                      (int)dwBuffer, (int)dwWriteMode);
+    }
 
     if ( dwType & 1 )
     {
@@ -223,7 +225,9 @@ grLfbLock( GrLock_t dwType,
 FX_ENTRY FxBool FX_CALL
 grLfbUnlock( GrLock_t dwType, GrBuffer_t dwBuffer )
 { 
-    GlideDebugMsg("DB_LFB: grLfbUnlock(type=%d, buffer=%d)\r\n", (int)dwType, (int)dwBuffer);
+    if (dwType == 2) {
+        GlideDebugMsg("DB_LFB: grLfbUnlock(TEXTURE_MEMORY)\r\n");
+    }
 #ifdef OGL_CRITICAL
     GlideMsg("grLfbUnlock( %d, %d )\n", dwType, dwBuffer ); 
 #endif

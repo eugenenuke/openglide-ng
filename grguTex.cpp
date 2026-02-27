@@ -72,9 +72,6 @@ grTexSource( GrChipID_t tmu,
     Glide.State.TexSource.Info.largeLod = info->largeLod;
     Glide.State.TexSource.Info.smallLod = info->smallLod;
 
-    GlideDebugMsg("DB_TEX: grTexSource(addr=0x%x, fmt=%d, lod=%d-%d)\r\n", 
-                  (unsigned int)startAddress, (int)info->format, (int)info->largeLod, (int)info->smallLod);
-
     Textures->Source( startAddress, evenOdd, info );    
 }
 

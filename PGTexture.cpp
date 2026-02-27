@@ -325,19 +325,16 @@ bool PGTexture::MakeReady( void )
         break;
     }
 
-    GlideDebugMsg("DB_TEX: MakeReady addr=0x%x hash=0x%x fmt=%d\r\n", (unsigned int)m_startAddress, (unsigned int)test_hash, (int)m_info.format);
-
     // See if we already have an OpenGL texture to match this
     if ( m_db->Find( m_startAddress, &m_info, test_hash,
                      &texNum, use_two_textures ? &tex2Num : NULL,
                      pal_change_ptr ) )
     {
-        GlideDebugMsg("DB_TEX: Cache HIT (texNum=%d)\r\n", (int)texNum);
         glBindTexture( GL_TEXTURE_2D, texNum );
 
         if ( palette_changed )
         {
-            GlideDebugMsg("DB_TEX: Palette CHANGED for texNum=%d\r\n", (int)texNum);
+            GlideDebugMsg("DB_TEX: Palette CHANGED for texNum=%d hash=0x%x\r\n", (int)texNum, (unsigned int)test_hash);
             p_glColorTableEXT( GL_TEXTURE_2D, GL_RGBA, 256, GL_BGRA_EXT, GL_UNSIGNED_BYTE, m_palette );
         }
 
