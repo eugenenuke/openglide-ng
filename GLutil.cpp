@@ -39,9 +39,13 @@ VARARGDECL(void) GlideMsg( const char *szString, ... )
     va_list( Arg );
     va_start( Arg, szString );
 
+    vprintf( szString, Arg ); // Also print to stdout
+    fflush( stdout );
+
     FILE *fHandle = fopen( GLIDEFILE, "at" );
     if ( !fHandle )
     {
+        va_end( Arg );
         return;
     }
     vfprintf( fHandle, szString, Arg );
