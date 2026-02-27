@@ -447,7 +447,13 @@ void GLExtensions( void )
         }
         else
         {
-            GlideMsg( "Using Palette Extension.\n" );
+            const char* env_no_pal = getenv("OPENGLIDE_NO_PALETTE");
+            if (env_no_pal && atoi(env_no_pal) > 0) {
+                GlideDebugMsg("DB_INIT: OPENGLIDE_NO_PALETTE set, disabling paletted textures (forcing bake-in)\r\n");
+                InternalConfig.EXT_paletted_texture = false;
+            } else {
+                GlideMsg( "Using Palette Extension.\n" );
+            }
         }
     }
 

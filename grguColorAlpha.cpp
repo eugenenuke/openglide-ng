@@ -515,6 +515,8 @@ grChromakeyValue( GrColor_t value )
 
     ConvertColor4B( value, OpenGL.ChromaColor );
 
+    GlideDebugMsg("DB_STATE: grChromakeyValue(0x%X)\r\n", value);
+
 //    ConvertColorB(  value, 
 //                    OpenGL.ChromaColor.R, 
 //                    OpenGL.ChromaColor.G, 
@@ -538,6 +540,8 @@ grChromakeyMode( GrChromakeyMode_t mode )
 #endif
 
     RenderDrawTriangles( );
+
+    GlideDebugMsg("DB_STATE: grChromakeyMode(%s)\r\n", mode ? "ENABLE" : "DISABLE");
 
     Textures->ChromakeyMode( mode );
 

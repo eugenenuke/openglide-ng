@@ -378,6 +378,10 @@ grTexDownloadTablePartial( GrChipID_t   tmu,
     RenderDrawTriangles( );
 
     Textures->DownloadTable( type, ((FxU32*)data) + start, start, end + 1 - start );
+    
+    GlideDebugMsg("DB_TEX: grTexDownloadTablePartial(tmu=%d, %s, start=%d, end=%d, hash=0x%x)\r\n", 
+        tmu, (type == GR_TEXTABLE_PALETTE ? "PALETTE" : "NCC"), start, end,
+        DebugContentHash((FxU8*)data + (start * 4), (end + 1 - start) * 4));
 }
 
 //*************************************************
