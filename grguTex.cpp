@@ -58,11 +58,6 @@ grTexSource( GrChipID_t tmu,
     GlideMsg( "grTexSource( %d, %d, %d, --- )\n", tmu, startAddress, evenOdd );
 #endif
 
-    if ( tmu != GR_TMU0 )
-    {
-        return;
-    }
-
     RenderDrawTriangles( );
 
     Glide.State.TexSource.StartAddress = startAddress;
@@ -103,11 +98,6 @@ grTexDownloadMipMap( GrChipID_t tmu,
     GlideMsg( "grTexDownloadMipMap( %d, %u, %u, --- )\n", tmu, 
         startAddress, evenOdd );
 #endif
-
-    if ( tmu != GR_TMU0 )
-    {
-        return;
-    }
 
     RenderDrawTriangles( );
 
@@ -205,10 +195,10 @@ grTexClampMode( GrChipID_t tmu,
         tmu, s_clampmode, t_clampmode );
 #endif
 
-    if ( tmu != GR_TMU0 )
-    {
-        return;
-    }
+//    if ( tmu != GR_TMU0 )
+//    {
+//        return;
+//    }
 
     RenderDrawTriangles( );
 
@@ -244,10 +234,10 @@ grTexFilterMode( GrChipID_t tmu,
         tmu, minfilter_mode, magfilter_mode );
 #endif
 
-    if ( tmu != GR_TMU0 )
-    {
-        return;
-    }
+//    if ( tmu != GR_TMU0 )
+//    {
+//        return;
+//    }
 
     RenderDrawTriangles( );
 
@@ -317,10 +307,10 @@ grTexMipMapMode( GrChipID_t     tmu,
         tmu, mode, lodBlend );
 #endif
 
-    if ( tmu != GR_TMU0 )
-    {
-        return;
-    }
+//    if ( tmu != GR_TMU0 )
+//    {
+//        return;
+//    }
 
     Glide.State.MipMapMode = mode;
     Glide.State.LodBlend = lodBlend;

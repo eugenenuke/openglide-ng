@@ -253,6 +253,10 @@ void ValidateUserConfig( void )
     GlideMsg( "OpenGL Extensions:\n" );
     GlideMsg( OGL_LOG_SEPARATE );
 
+    UserConfig.ARB_multitexture = true; // Force Multi-Texture
+    UserConfig.EXT_vertex_array = true; // Force Vertex Arrays
+    UserConfig.TextureMemorySize = 16;  // Force 16MB
+
     int index = 0;
     while ( strlen( glNecessaryExt[ index ].name ) > 0 )
     {
