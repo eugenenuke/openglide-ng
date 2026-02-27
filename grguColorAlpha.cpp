@@ -123,6 +123,9 @@ grColorCombine( GrCombineFunction_t function, GrCombineFactor_t factor,
 
     RenderDrawTriangles( );
 
+    GlideDebugMsg("DB_STATE: grColorCombine(fn=%d, fac=%d, loc=%d, oth=%d, inv=%d)\r\n", 
+                  (int)function, (int)factor, (int)local, (int)other, (int)invert);
+
     Glide.State.ColorCombineFunction    = function;
     Glide.State.ColorCombineFactor      = factor;
     Glide.State.ColorCombineLocal       = local;
@@ -439,7 +442,11 @@ grAlphaCombine( GrCombineFunction_t function, GrCombineFactor_t factor,
 
     RenderDrawTriangles( );
 
-    Glide.State.AlphaFunction = function;
+    GlideDebugMsg("DB_STATE: grAlphaCombine(fn=%d, fac=%d, loc=%d, oth=%d, inv=%d)\r\n", 
+                  (int)function, (int)factor, (int)local, (int)other, (int)invert);
+
+    Glide.State.AlphaFunction   = function;
+
     Glide.State.AlphaFactor = factor;
     Glide.State.AlphaLocal = local;
     Glide.State.AlphaOther = other;

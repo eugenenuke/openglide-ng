@@ -185,8 +185,8 @@ grGet( FxU32 pname, FxU32 plength, FxI32 *params )
         chipRev[0] = 0x1002; chipRev[1] = 0x1001;
     }
     if (!strncmp(chipstr, "Voodoo2", sizeof("Voodoo2"))) {
-        chipMem[1] = Glide.TextureMemory;
-        chipMem[0] = Glide.TextureMemory>>1;
+        chipMem[1] = 0x1000000; // Force 16MB TMU Memory
+        chipMem[0] = 0x800000;  // 8MB FB Memory
     }
     vertex3x.viewPort[2] = Glide.WindowWidth;
     vertex3x.viewPort[3] = Glide.WindowHeight;

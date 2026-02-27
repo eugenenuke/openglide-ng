@@ -104,7 +104,6 @@ grTexDownloadMipMap( GrChipID_t tmu,
     GlideDebugMsg("DB_TEX: grTexDownloadMipMap(tmu=%d, addr=0x%x, contentHash=0x%x, fmt=%d)\r\n", 
                   (int)tmu, (unsigned int)startAddress, DebugContentHash(info->data, 1024), (int)info->format); // Hash first 1K
 
-    info->smallLod = info->largeLod;
     Textures->DownloadMipMap( startAddress, evenOdd, info );
 }
 
@@ -431,6 +430,9 @@ grTexCombine( GrChipID_t tmu,
 //    }
 
     RenderDrawTriangles( );
+
+    GlideDebugMsg("DB_STATE: grTexCombine(tmu=%d, rgb_fn=%d, rgb_fac=%d, a_fn=%d, a_fac=%d, rgb_inv=%d, a_inv=%d)\r\n", 
+                  (int)tmu, (int)rgb_function, (int)rgb_factor, (int)alpha_function, (int)alpha_factor, (int)rgb_invert, (int)alpha_invert);
 
     Glide.State.TextureCombineCFunction = rgb_function;
     Glide.State.TextureCombineCFactor   = rgb_factor;

@@ -510,18 +510,20 @@ grSstQueryHardware( GrHwConfiguration *hwconfig )
 #ifdef OGL_DONE
     GlideMsg( "grSstQueryHardware( --- )\n" );
 #endif
-    GlideMsg( "DB_STATE: grSstQueryHardware spoofing Voodoo 2 (2 TMUs, 16MB/TMU)\n" );
+    GlideDebugMsg("DB_STATE: grSstQueryHardware spoofing Voodoo 2 SLI (2 SSTs, 2 TMUs/SST, 16MB/TMU)\r\n");
 
-    hwconfig->num_sst = 1;
-    hwconfig->SSTs[0].type = GR_SSTTYPE_Voodoo2;
-    hwconfig->SSTs[0].sstBoard.VoodooConfig.fbRam = 4; // 4MB FBI
-    hwconfig->SSTs[0].sstBoard.VoodooConfig.fbiRev = 2;
-    hwconfig->SSTs[0].sstBoard.VoodooConfig.nTexelfx = 2; // 2 TMUs
-    hwconfig->SSTs[0].sstBoard.VoodooConfig.sliDetect = FXFALSE;
-    hwconfig->SSTs[0].sstBoard.VoodooConfig.tmuConfig[0].tmuRev = 1;
-    hwconfig->SSTs[0].sstBoard.VoodooConfig.tmuConfig[0].tmuRam = 16; // 16MB
-    hwconfig->SSTs[0].sstBoard.VoodooConfig.tmuConfig[1].tmuRev = 1;
-    hwconfig->SSTs[0].sstBoard.VoodooConfig.tmuConfig[1].tmuRam = 16; // 16MB
+    hwconfig->num_sst = 2; // Report SLI
+    for (int i = 0; i < 2; i++) {
+        hwconfig->SSTs[i].type = GR_SSTTYPE_Voodoo2;
+        hwconfig->SSTs[i].sstBoard.VoodooConfig.fbRam = 4;
+        hwconfig->SSTs[i].sstBoard.VoodooConfig.fbiRev = 2;
+        hwconfig->SSTs[i].sstBoard.VoodooConfig.nTexelfx = 2;
+        hwconfig->SSTs[i].sstBoard.VoodooConfig.sliDetect = FXFALSE;
+        hwconfig->SSTs[i].sstBoard.VoodooConfig.tmuConfig[0].tmuRev = 2;
+        hwconfig->SSTs[i].sstBoard.VoodooConfig.tmuConfig[0].tmuRam = 16;
+        hwconfig->SSTs[i].sstBoard.VoodooConfig.tmuConfig[1].tmuRev = 2;
+        hwconfig->SSTs[i].sstBoard.VoodooConfig.tmuConfig[1].tmuRam = 16;
+    }
 
     return FXTRUE;
 }
