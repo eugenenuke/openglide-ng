@@ -43,8 +43,18 @@
 
 extern int OpenGLideDebug;
 #define GlideDebugMsg(...) do { \
-    if (OpenGLideDebug) { fprintf(stderr, __VA_ARGS__); } \
+    if (OpenGLideDebug > 0) { fprintf(stderr, __VA_ARGS__); } \
 } while(0)
+
+inline unsigned int DebugContentHash(const void* data, int size) {
+    if (!data || size <= 0) return 0;
+    unsigned int hash = 0;
+    const unsigned char* p = (const unsigned char*)data;
+    for (int i = 0; i < size; i++) {
+        hash = (hash << 5) - hash + p[i];
+    }
+    return hash;
+}
 
 #include "sdk2_glide.h"
 

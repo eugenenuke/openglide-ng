@@ -72,6 +72,8 @@ grTexSource( GrChipID_t tmu,
     Glide.State.TexSource.Info.largeLod = info->largeLod;
     Glide.State.TexSource.Info.smallLod = info->smallLod;
 
+    GlideDebugMsg("DB_TEX: grTexSource(tmu=%d, addr=0x%x)\r\n", (int)tmu, (unsigned int)startAddress);
+
     Textures->Source( startAddress, evenOdd, info );    
 }
 
@@ -109,8 +111,8 @@ grTexDownloadMipMap( GrChipID_t tmu,
 
     RenderDrawTriangles( );
 
-    GlideDebugMsg("DB_TEX: DownloadMipMap(addr=0x%x, fmt=%d, lod=%d-%d)\r\n", 
-                  (unsigned int)startAddress, (int)info->format, (int)info->largeLod, (int)info->smallLod);
+    GlideDebugMsg("DB_TEX: grTexDownloadMipMap(tmu=%d, addr=0x%x, contentHash=0x%x)\r\n", 
+                  (int)tmu, (unsigned int)startAddress, DebugContentHash(info->data, 256)); // Hash first 256 bytes
 
     info->smallLod = info->largeLod;
     Textures->DownloadMipMap( startAddress, evenOdd, info );
@@ -134,8 +136,12 @@ grTexDownloadMipMapLevel( GrChipID_t        tmu,
 
     if ( ( tmu != GR_TMU0 ) )
     {
+        GlideDebugMsg("DB_TEX: grTexDownload-Level SKIP (tmu=%d)\r\n", (int)tmu);
         return;
     }
+
+    GlideDebugMsg("DB_TEX: grTexDownload-Level(tmu=%d, addr=0x%x, hash=0x%x)\r\n", 
+                  (int)tmu, (unsigned int)startAddress, DebugContentHash(data, 256));
 
     GrTexInfo info;
 
@@ -168,8 +174,12 @@ grTexDownloadMipMapLevelPartial( GrChipID_t        tmu,
 
     if ( ( tmu != GR_TMU0 ) )
     {
+        GlideDebugMsg("DB_TEX: grTexDownload-Level SKIP (tmu=%d)\r\n", (int)tmu);
         return;
     }
+
+    GlideDebugMsg("DB_TEX: grTexDownload-Level(tmu=%d, addr=0x%x, hash=0x%x)\r\n", 
+                  (int)tmu, (unsigned int)startAddress, DebugContentHash(data, 256));
 
     GrTexInfo info;
 
